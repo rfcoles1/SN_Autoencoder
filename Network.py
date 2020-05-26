@@ -7,6 +7,7 @@ import pickle
 from collections import defaultdict
 
 import tensorflow as tf
+import tensorflow.keras.layers as layers
 import tensorflow.keras.backend as K
 
 from torch.utils.data import DataLoader
@@ -17,11 +18,11 @@ from Payne import *
 
 def Conv1DTrans(inp, filters, kernel_size, strides, activation=tf.nn.relu, padding='valid'):
 
-    x = tf.keras.layers.Lambda(lambda x: K.expand_dims(x, axis=2))(inp)
-    x = tf.keras.layers.Conv2DTranspose(filters=filters, kernel_size=(kernel_size, 1), \
+    x = layers.Lambda(lambda x: K.expand_dims(x, axis=2))(inp)
+    x = layers.Conv2DTranspose(filters=filters, kernel_size=(kernel_size, 1), \
         strides=(strides, 1), kernel_initializer='glorot_normal', \
         activation=activation, padding=padding)(x)
-    x = tf.keras.layers.Lambda(lambda x: K.squeeze(x, axis=2))(x)
+    x = layers.Lambda(lambda x: K.squeeze(x, axis=2))(x)
 
     return x
 
@@ -49,10 +50,10 @@ class Network():
         self.losses_path = './records/losses_tmp.pickle' 
         self.checkpoint_path = './records/cp_tmp'
 
-        self.en_input = tf.keras.layers.Input(shape=(7167,1), name='enc')
+        self.en_input = layers.Input(shape=(7167,1), name='enc')
         self.encoder = tf.keras.models.Model(self.en_input, self.Encoder(self.en_input))
 
-        self.de_input = tf.keras.layers.Input(shape=(25+self.num_z), name='dec')
+        self.de_input = layers.Input(shape=(25+self.num_z), name='dec')
         self.decoder = tf.keras.models.Model(self.de_input, self.Decoder(self.de_input))
     
         self.op_enc = tf.keras.optimizers.Adam(learning_rate=self.lr_enc)
@@ -95,24 +96,24 @@ class Network():
 
 
     def Encoder(self,y):
-        x = tf.keras.layers.Conv1D(filters=32, kernel_size=7, strides=4, \
+        x = layers.Conv1D(filters=32, kernel_size=7, strides=4, \
             kernel_initializer='glorot_normal', activation=tf.nn.relu)(y)
-        x = tf.keras.layers.Conv1D(filters=64, kernel_size=7, strides=4, \
+        x = layers.Conv1D(filters=64, kernel_size=7, strides=4, \
             kernel_initializer='glorot_normal', activation=tf.nn.relu)(x)
-        x = tf.keras.layers.Conv1D(filters=128, kernel_size=7, strides=4, \
+        x = layers.Conv1D(filters=128, kernel_size=7, strides=4, \
             kernel_initializer='glorot_normal', activation=tf.nn.relu)(x)
-        x = tf.keras.layers.Conv1D(filters=256, kernel_size=7, strides=4, \
+        x = layers.Conv1D(filters=256, kernel_size=7, strides=4, \
             kernel_initializer='glorot_normal', activation=tf.nn.relu)(x)
-        x = tf.keras.layers.Conv1D(filters=512, kernel_size=7, strides=4, \
+        x = layers.Conv1D(filters=512, kernel_size=7, strides=4, \
             kernel_initializer='glorot_normal', activation=tf.nn.relu)(x)
 
-        x = tf.keras.layers.Flatten()(x)
-        outy = tf.keras.layers.Dense(25)(x)
-        outz = tf.keras.layers.Dense(2)(x)
+        x = layers.Flatten()(x)
+        outy = layers.Dense(25)(x)
+        outz = layers.Dense(2)(x)
         return outy,outz
 
     def Decoder(self,x):
-        y = tf.keras.layers.Dense(3072)(x)
+        y = layers.Dense(3072)(x)
         y = tf.reshape(y,[-1,6,512])
 
         y = Conv1DTrans(y,filters=512, kernel_size=7, strides=4)
@@ -150,8 +151,10 @@ class Network():
             shuffle=True, drop_last=True)
         batch = next(iter(loader))
         
-        inp = np.reshape(batch['x'], (N,7167,1)).numpy()
-        mask = np.reshape(batch['x_msk'], (N,7167,1)).numpy()
-        err = np.reshape(batch['x_err'], (N,7167,1)).numpy()
+        #inp = np.reshape(batch['x'], (N,7167,1)).numpy()
+        #mask = np.reshape(batch['x_msk'], (N,7167,1)).numpy()
+        #err = np.reshape(batch['x_err'], (N,7167,1)).numpy()
 
-        return inp,mask,err
+        #return inp,mask,err
+
+        return batch
