@@ -71,4 +71,4 @@ class Obs_Network(Network):
     def predict_ae(self, N = 500):
         inp,mask,err = self.get_batch_obs(N)
         pred = self.ae.predict_on_batch((inp,mask,err))
-        return inp,mask,err pred
+        return inp,mask,err, pred

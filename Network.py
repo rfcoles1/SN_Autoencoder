@@ -46,6 +46,7 @@ class Network():
         self.save_freq = 1
         self.lr_enc = 0.0001
         self.lr_dec = 0.0001
+        self.lr_ae = 0.0001
 
         self.losses_path = './records/losses_tmp.pickle' 
         self.checkpoint_path = './records/cp_tmp'
@@ -55,9 +56,13 @@ class Network():
 
         self.de_input = layers.Input(shape=(25+self.num_z), name='dec')
         self.decoder = tf.keras.models.Model(self.de_input, self.Decoder(self.de_input))
-    
+   
+        self.mask = tf.keras.layers.Input(shape=(7167,1))
+        self.err = tf.keras.layers.Input(shape=(7167,1))
+
         self.op_enc = tf.keras.optimizers.Adam(learning_rate=self.lr_enc)
         self.op_dec = tf.keras.optimizers.Adam(learning_rate=self.lr_dec)
+        self.op_ae = tf.keras.optimizers.Adam(learning_rate=self.lr_ae)
 
         self.labels_payne = np.load('./data/mock_all_spectra_no_noise_resample_prior_large.npz')['labels'].T
         self.perturbations = [100., 0.1, 0.2, *np.repeat(0.1, 20), 5., 2.]
@@ -151,10 +156,8 @@ class Network():
             shuffle=True, drop_last=True)
         batch = next(iter(loader))
         
-        #inp = np.reshape(batch['x'], (N,7167,1)).numpy()
-        #mask = np.reshape(batch['x_msk'], (N,7167,1)).numpy()
-        #err = np.reshape(batch['x_err'], (N,7167,1)).numpy()
+        inp = np.reshape(batch['x'], (N,7167,1)).numpy()
+        mask = np.reshape(batch['x_msk'], (N,7167,1)).numpy()
+        err = np.reshape(batch['x_err'], (N,7167,1)).numpy()
 
-        #return inp,mask,err
-
-        return batch
+        return inp,mask,err
