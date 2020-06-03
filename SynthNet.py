@@ -12,7 +12,7 @@ class Synth_Network(Network):
 
         self.reset()
 
-    def train(self, train_epoch):
+    def train(self, train_epoch, norm=True):
         it = 1
         
         ylosses = np.zeros(self.verbose)
@@ -20,7 +20,7 @@ class Synth_Network(Network):
         xlosses = np.zeros(self.verbose)
 
         while it < train_epoch:
-            train_in = self.get_batch_synth(self.batch_size)
+            train_in = self.get_batch_synth(self.batch_size, norm_param=norm, norm_spec=False)
             inp = np.reshape(train_in[0].detach().numpy(),(self.batch_size,7167,1))
             out = train_in[1].numpy()
            
@@ -55,8 +55,8 @@ class Synth_Network(Network):
             it += 1
    
 
-    def predict_enc(self, N = 500):
-        batch = self.get_batch_synth(N)
+    def predict_enc(self, N = 500, norm=True):
+        batch = self.get_batch_synth(N,norm)
 
         inp = np.reshape(batch[0].detach().numpy(), (N,7167,1))
         true = batch[1].numpy()
@@ -64,8 +64,8 @@ class Synth_Network(Network):
         pred = self.encoder.predict_on_batch(inp)[0]
         return inp, true, pred
 
-    def predict_dec(self, N = 500):
-        batch = self.get_batch_synth(N)
+    def predict_dec(self, N = 500, norm=True):
+        batch = self.get_batch_synth(N,norm)
 
         true = np.reshape(batch[0].detach().numpy(), (N,7167,1))
         inp = batch[1].numpy()
@@ -74,8 +74,8 @@ class Synth_Network(Network):
         pred = self.decoder.predict_on_batch(inp)
         return inp, true, pred
 
-    def predict_ae_synth(self, N = 500):
-        batch = self.get_batch_synth(N)
+    def predict_ae_synth(self, N = 500, norm=True):
+        batch = self.get_batch_synth(N,norm)
 
         true = np.reshape(batch[0].detach().numpy(), (N,7167,1))
         enc = self.encoder.predict_on_batch(true)

@@ -136,17 +136,19 @@ class Network():
         return self.emulator(y)
     """
 
-    def get_batch_synth(self, N=4):
+    def get_batch_synth(self, N=4, norm_param=True, norm_spec=True):
         y = np.copy(self.labels_payne[np.random.randint(len(self.labels_payne), size=N)])
         y += np.array([np.random.uniform(-1*p, p, size=N) for p in self.perturbations]).T
         for i in [2,23,24]:
             y[y[:,i]<np.min(self.labels_payne[:,i]),i] = np.min(self.labels_payne[:,i])
 
         y = Variable(torch.Tensor(y.astype(np.float32)))
-        y = (y - self.y_min)/(self.y_max - self.y_min) - 0.5
+        if norm_param:
+            y = (y - self.y_min)/(self.y_max - self.y_min) - 0.5
 
         x = self.emulator(y)
-        x = (x - self.x_mean) / self.x_std
+        if norm_spec:
+            x = (x - self.x_mean) / self.x_std
         x = x[:,47:]
 
         return x, y
