@@ -13,7 +13,8 @@ class Obs_Network(Network):
         
         encoded = tf.concat(self.encoder(self.en_input),axis=1)
 
-        self.ae = tf.keras.models.Model([self.en_input,self.mask, self.err], self.decoder(encoded))
+        self.ae = tf.keras.models.Model([self.en_input,self.mask, self.err],\
+            self.decoder(encoded), name='ae')
         self.ae.add_loss(loss_ae_mask(self.en_input, self.decoder(encoded), self.mask, self.err))
 
         self.ae.compile(optimizer = self.op_ae, loss=None)

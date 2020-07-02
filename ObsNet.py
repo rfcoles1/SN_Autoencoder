@@ -9,28 +9,16 @@ class Obs_Network(Network):
         self.losses_path = './records/losses_' + obs_model + '.pickle'
         self.checkpoint_path = './records/cp_' + obs_model
 
-        op_ae = tf.keras.optimizers.Adam(learning_rate=0.0001)
-        
         encoded = tf.concat(self.encoder(self.en_input),axis=1)
               
         if self.error == 'mask':
-            self.mask = tf.keras.layers.Input(shape=(7167,1), name='mask')
-            self.err = tf.keras.layers.Input(shape=(7167,1), name='err')
-            self.ae = tf.keras.models.Model([self.en_input, self.mask, self.err], self.decoder(encoded))
+            self.ae = tf.keras.models.Model([self.en_input, self.mask, self.err],\
+                self.decoder(encoded), name='ae')
             self.ae.add_loss(loss_ae_mask(self.en_input, self.decoder(encoded), self.mask, self.err))
-            self.ae.compile(optimizer = op_ae, loss = None)
+            self.ae.compile(optimizer = self.op_ae, loss = None)
         else:
-            self.ae = tf.keras.models.Model(self.en_input, self.decoder(encoded))
-            self.ae.compile(optimizer = op_ae, loss = loss_ae)
-
-        self.norm_data = np.load('./data/normalization_data.npz')
-        self.x_mean = torch.Tensor(self.norm_data['x_mean'].astype(np.float32))
-        self.x_std = torch.Tensor(self.norm_data['x_std'].astype(np.float32))
-        
-        self.obs_dataset = PayneObservedDataset('./data/aspcapStar_dr14.h5', obs_domain='APOGEE',\
-            dataset='train', x_mean=self.x_mean, x_std=self.x_std, collect_x_mask=True)
-        self.obs_train_dataloader = DataLoader(self.obs_dataset, batch_size=self.batch_size,\
-            shuffle=True, drop_last=True)
+            self.ae = tf.keras.models.Model(self.en_input, self.decoder(encoded), name='unmasked_ae')
+            self.ae.compile(optimizer = self.op_ae, loss = loss_ae)
         
         self.reset()
 

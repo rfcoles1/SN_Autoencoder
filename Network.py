@@ -34,12 +34,12 @@ def loss_ae_mask(y_true, y_pred, mask, error):
 
 def loss_enc(y_true, y_pred):
     return tf.keras.losses.MSE(y_pred, y_true)
-
+    
 def loss_dec(y_true, y_pred):
     return tf.math.reduce_mean((y_pred - y_true)**2)
 
 class Network():
-    def __init__(self, num_z=2):
+    def __init__(self, num_z=10):
         self.batch_size = 4
         self.num_z = num_z
         self.verbose = 1000
@@ -51,14 +51,14 @@ class Network():
         self.losses_path = './records/losses_tmp.pickle' 
         self.checkpoint_path = './records/cp_tmp'
 
-        self.en_input = layers.Input(shape=(7167,1), name='enc')
-        self.encoder = tf.keras.models.Model(self.en_input, self.Encoder(self.en_input))
+        self.en_input = layers.Input(shape=(7167,1), name='encoder_input')
+        self.encoder = tf.keras.models.Model(self.en_input, self.Encoder(self.en_input), name='encoder')
 
-        self.de_input = layers.Input(shape=(25+self.num_z), name='dec')
-        self.decoder = tf.keras.models.Model(self.de_input, self.Decoder(self.de_input))
+        self.de_input = layers.Input(shape=(25+self.num_z), name='dececoder_input')
+        self.decoder = tf.keras.models.Model(self.de_input, self.Decoder(self.de_input), name='decoder')
    
-        self.mask = tf.keras.layers.Input(shape=(7167,1))
-        self.err = tf.keras.layers.Input(shape=(7167,1))
+        self.mask = tf.keras.layers.Input(shape=(7167,1), name='mask_input')
+        self.err = tf.keras.layers.Input(shape=(7167,1), name='err_input')
 
         self.op_enc = tf.keras.optimizers.Adam(learning_rate=self.lr_enc)
         self.op_dec = tf.keras.optimizers.Adam(learning_rate=self.lr_dec)
@@ -114,7 +114,7 @@ class Network():
 
         x = layers.Flatten()(x)
         outy = layers.Dense(25)(x)
-        outz = layers.Dense(2)(x)
+        outz = layers.Dense(self.num_z)(x)
         return outy,outz
 
     def Decoder(self,x):
@@ -130,11 +130,6 @@ class Network():
         outx = Conv1DTrans(y,filters=1, kernel_size=1, strides=1, activation=None)
         return outx
 
-    """ 
-    def run_emulator(self,y):
-        y = (y - self.y_min)/(self.y_max - self.y_min) - 0.5
-        return self.emulator(y)
-    """
 
     def get_batch_synth(self, N=4, norm_param=True, norm_spec=True):
         y = np.copy(self.labels_payne[np.random.randint(len(self.labels_payne), size=N)])
