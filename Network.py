@@ -26,17 +26,23 @@ def Conv1DTrans(inp, filters, kernel_size, strides, activation=tf.nn.relu, paddi
 
     return x
 
+"""
 def loss_ae(y_true, y_pred):
     return tf.math.reduce_mean((y_pred - y_true)**2)
-
+"""
 def loss_ae_mask(y_true, y_pred, mask, error):
     return tf.math.reduce_mean(((y_pred-y_true)*mask/error)**2)
 
+"""
 def loss_enc(y_true, y_pred):
     return tf.keras.losses.MSE(y_pred, y_true)
     
 def loss_dec(y_true, y_pred):
     return tf.math.reduce_mean((y_pred - y_true)**2)
+"""
+def loss_mse(y_true, y_pred):
+    return tf.math.reduce_mean((y_pred - y_true)**2)
+
 
 class Network():
     def __init__(self, num_z=10):

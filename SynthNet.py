@@ -7,8 +7,8 @@ class Synth_Network(Network):
         self.losses_path = './records/losses_' + synth_model + '.pickle'
         self.checkpoint_path = './records/cp_' + synth_model
 
-        self.encoder.compile(optimizer=self.op_enc, loss=loss_enc)
-        self.decoder.compile(optimizer=self.op_dec, loss=loss_dec)
+        self.encoder.compile(optimizer=self.op_enc, loss=loss_mse)
+        self.decoder.compile(optimizer=self.op_dec, loss=loss_mse)
 
         self.reset()
 

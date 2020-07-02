@@ -18,7 +18,7 @@ class Obs_Network(Network):
             self.ae.compile(optimizer = self.op_ae, loss = None)
         else:
             self.ae = tf.keras.models.Model(self.en_input, self.decoder(encoded), name='unmasked_ae')
-            self.ae.compile(optimizer = self.op_ae, loss = loss_ae)
+            self.ae.compile(optimizer = self.op_ae, loss = loss_mse)
         
         self.reset()
 

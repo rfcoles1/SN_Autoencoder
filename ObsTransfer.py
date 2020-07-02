@@ -8,8 +8,8 @@ class Obs_Network(Network):
         self.losses_path = './records/losses_' + obs_model + '.pickle'
         self.checkpoint_path = './records/cp_' + obs_model
 
-        self.encoder.compile(optimizer=self.op_enc, loss=loss_enc)
-        self.decoder.compile(optimizer=self.op_dec, loss=loss_dec)
+        self.encoder.compile(optimizer=self.op_enc, loss=loss_mse)
+        self.decoder.compile(optimizer=self.op_dec, loss=loss_mse)
         
         encoded = tf.concat(self.encoder(self.en_input),axis=1)
 
