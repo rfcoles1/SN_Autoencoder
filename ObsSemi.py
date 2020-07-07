@@ -23,9 +23,9 @@ class Obs_Network(Network):
     def train(self, train_epoch):
         it = 1
 
-        synth_recon_losses = np.zeros(self.verbose)
-        obs_recon_losses = np.zeros(self.verbose)
-        param_losses = np.zeros(self.verbose)
+        synth_recon_losses = np.zeros(self.checkpoint)
+        obs_recon_losses = np.zeros(self.checkpoint)
+        param_losses = np.zeros(self.checkpoint)
  
         while it < train_epoch:
             synth_in = self.get_batch_synth(self.x_mean, self.x_std, \
@@ -45,12 +45,12 @@ class Obs_Network(Network):
             synth_dec_loss = self.decoder.train_on_batch( \
                 np.concatenate([synth_out,np.zeros([self.batch_size,self.num_z])],axis=1),synth_inp)
 
-            obs_recon_losses[it%self.verbose] = obs_loss
-            synth_recon_losses[it%self.verbose] = synth_dec_loss
-            param_losses[it%self.verbose] = synth_enc_loss[1]
+            obs_recon_losses[it%self.checkpoint] = obs_loss
+            synth_recon_losses[it%self.checkpoint] = synth_dec_loss
+            param_losses[it%self.checkpoint] = synth_enc_loss[1]
 
-            if it % self.verbose == 0:
-                self.curr_epoch += self.verbose
+            if it % self.checkpoint == 0:
+                self.curr_epoch += self.checkpoint
 
                 print('Iterations %d' % self.curr_epoch)
                 print('Obs Reconstruct Loss %f' % np.mean(obs_recon_losses))
@@ -62,11 +62,11 @@ class Obs_Network(Network):
                 self.losses['synth_recon_loss'].append(np.mean(synth_recon_losses))
                 self.losses['param_loss'].append(np.mean(param_losses))
                 
-                obs_recon_losses = np.zeros(self.verbose)
-                synth_recon_losses = np.zeros(self.verbose)
-                param_losses = np.zeros(self.verbose)
-                if it % self.verbose*self.save_freq == 0:
-                    self.save()
+                obs_recon_losses = np.zeros(self.checkpoint)
+                synth_recon_losses = np.zeros(self.checkpoint)
+                param_losses = np.zeros(self.checkpoint)
+                
+                self.save()
 
             it += 1
             

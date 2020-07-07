@@ -48,8 +48,7 @@ class Network():
     def __init__(self, num_z=10):
         self.batch_size = 4
         self.num_z = num_z
-        self.verbose = 1000
-        self.save_freq = 1
+        self.checkpoint = 1000
         self.lr_enc = 0.0001
         self.lr_dec = 0.0001
         self.lr_ae = 0.0001

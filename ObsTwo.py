@@ -92,11 +92,11 @@ class Obs_Network(Network):
     def train(self, train_epoch):
         it = 1
         
-        synth_param_losses = np.zeros(self.verbose)
-        synth_recon_losses = np.zeros(self.verbose)
-        obs_recon_losses = np.zeros(self.verbose)
-        regular_losses = np.zeros(self.verbose)
-        total_losses = np.zeros(self.verbose)
+        synth_param_losses = np.zeros(self.checkpoint)
+        synth_recon_losses = np.zeros(self.checkpoint)
+        obs_recon_losses = np.zeros(self.checkpoint)
+        regular_losses = np.zeros(self.checkpoint)
+        total_losses = np.zeros(self.checkpoint)
 
         while it < train_epoch:
             synth_in = self.get_batch_synth(N=self.batch_size)
@@ -115,14 +115,14 @@ class Obs_Network(Network):
             dec_synth_loss = loss[3]
             regular_loss = loss[4]
             
-            obs_recon_losses[it%self.verbose] = recon_obs_loss
-            synth_recon_losses[it%self.verbose] = dec_synth_loss
-            synth_param_losses[it%self.verbose] = enc_synth_loss
-            regular_losses[it%self.verbose] = regular_loss
-            total_losses[it%self.verbose] = loss[0]
+            obs_recon_losses[it%self.checkpoint] = recon_obs_loss
+            synth_recon_losses[it%self.checkpoint] = dec_synth_loss
+            synth_param_losses[it%self.checkpoint] = enc_synth_loss
+            regular_losses[it%self.checkpoint] = regular_loss
+            total_losses[it%self.checkpoint] = loss[0]
             
-            if it % self.verbose == 0:
-                self.curr_epoch += self.verbose
+            if it % self.checkpoint == 0:
+                self.curr_epoch += self.checkpoint
 
                 print('Iterations %d' % self.curr_epoch)
                 print('Obs Reconstruct Loss %f' % np.mean(obs_recon_losses))
@@ -138,14 +138,13 @@ class Obs_Network(Network):
                 self.losses['regular_loss'].append(np.mean(regular_losses))
                 self.losses['total_loss'].append(np.mean(total_losses))
 
-                obs_recon_losses = np.zeros(self.verbose)
-                synth_recon_losses = np.zeros(self.verbose)
-                param_losses = np.zeros(self.verbose)
-                regular_losses = np.zeros(self.verbose)
-                total_losses = np.zeros(self.verbose)
+                obs_recon_losses = np.zeros(self.checkpoint)
+                synth_recon_losses = np.zeros(self.checkpoint)
+                param_losses = np.zeros(self.checkpoint)
+                regular_losses = np.zeros(self.checkpoint)
+                total_losses = np.zeros(self.checkpoint)
 
-                if it % self.verbose*self.save_freq == 0:
-                    self.save()
+                self.save()
 
             it += 1
             

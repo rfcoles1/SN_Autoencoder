@@ -29,8 +29,8 @@ class Obs_Network(Network):
     def train_ae(self, train_epoch):
         it = 1
 
-        recon_losses = np.zeros(self.verbose)
-        param_losses = np.zeros(self.verbose)
+        recon_losses = np.zeros(self.checkpoint)
+        param_losses = np.zeros(self.checkpoint)
  
         while it < train_epoch:
             synth_in = self.get_batch_synth(self.x_mean, self.x_std, \
@@ -47,11 +47,11 @@ class Obs_Network(Network):
             params_pred = self.encoder.predict_on_batch(synth_inp)[0]
             params_err = np.mean((params_pred - synth_out)**2)
             
-            recon_losses[it%self.verbose] = loss
-            param_losses[it%self.verbose] = params_err
+            recon_losses[it%self.checkpoint] = loss
+            param_losses[it%self.checkpoint] = params_err
 
-            if it % self.verbose == 0:
-                self.curr_epoch += self.verbose
+            if it % self.checkpoint == 0:
+                self.curr_epoch += self.checkpoint
 
                 print('Iterations %d' % self.curr_epoch)
                 print('Reconstruct Loss %f' % np.mean(recon_losses))
@@ -61,18 +61,17 @@ class Obs_Network(Network):
                 self.losses['recon_loss'].append(np.mean(recon_losses))
                 self.losses['param_loss'].append(np.mean(param_losses))
                 
-                recon_losses = np.zeros(self.verbose)
-                param_losses = np.zeros(self.verbose)
-                if it % self.verbose*self.save_freq == 0:
-                    self.save()
+                recon_losses = np.zeros(self.checkpoint)
+                param_losses = np.zeros(self.checkpoint)
+                self.save()
 
             it += 1
      
     def train_ae_synth(self, train_epoch):
         it = 1
 
-        recon_losses = np.zeros(self.verbose)
-        param_losses = np.zeros(self.verbose)
+        recon_losses = np.zeros(self.checkpoint)
+        param_losses = np.zeros(self.checkpoint)
  
         while it < train_epoch:
             synth_in = self.get_batch_synth(self.x_mean, self.x_std, \
@@ -89,11 +88,11 @@ class Obs_Network(Network):
             params_err = self.encoder.train_on_batch(synth_inp, \
                 [synth_out,np.zeros([self.batch_size,self.num_z])])
 
-            recon_losses[it%self.verbose] = loss
-            param_losses[it%self.verbose] = params_err[1]
+            recon_losses[it%self.checkpoint] = loss
+            param_losses[it%self.checkpoint] = params_err[1]
 
-            if it % self.verbose == 0:
-                self.curr_epoch += self.verbose
+            if it % self.checkpoint == 0:
+                self.curr_epoch += self.checkpoint
 
                 print('Iterations %d' % self.curr_epoch)
                 print('Reconstruct Loss %f' % np.mean(recon_losses))
@@ -103,10 +102,9 @@ class Obs_Network(Network):
                 self.losses['recon_loss'].append(np.mean(recon_losses))
                 self.losses['param_loss'].append(np.mean(param_losses))
                 
-                recon_losses = np.zeros(self.verbose)
-                param_losses = np.zeros(self.verbose)
-                if it % self.verbose*self.save_freq == 0:
-                    self.save()
+                recon_losses = np.zeros(self.checkpoint)
+                param_losses = np.zeros(self.checkpoint)
+                self.save()
 
             it += 1
             

@@ -25,7 +25,7 @@ class Obs_Network(Network):
     def train(self, train_epoch):
         it = 1
 
-        losses = np.zeros(self.verbose)
+        losses = np.zeros(self.checkpoint)
         
         while it < train_epoch:
             if self.error == 'mask':
@@ -40,19 +40,19 @@ class Obs_Network(Network):
                 inp = np.reshape(batch['x'], (self.batch_size,7167,1)) 
                 loss = self.ae.train_on_batch(inp, inp)
 
-            losses[it%self.verbose] = loss
-            if it % self.verbose == 0:
-                self.curr_epoch += self.verbose
+            losses[it%self.checkpoint] = loss
+
+            if it % self.checkpoint == 0:
+                self.curr_epoch += self.checkpoint
                 print('Iterations %d' % self.curr_epoch) 
                 print('Reconstruct Loss %f' % np.mean(losses))
            
                 self.losses['iterations'].append(self.curr_epoch)
                 self.losses['loss'].append(np.mean(losses))
  
-                losses = np.zeros(self.verbose)
+                losses = np.zeros(self.checkpoint)
                
-                if it % self.verbose*self.save_freq == 0:
-                    self.save()
+                self.save()
 
             it += 1
 

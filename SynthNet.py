@@ -15,11 +15,11 @@ class Synth_Network(Network):
     def train(self, train_epoch, norm=True):
         it = 1
         
-        ylosses = np.zeros(self.verbose)
-        zlosses = np.zeros(self.verbose)
-        xlosses = np.zeros(self.verbose)
+        ylosses = np.zeros(self.checkpoint)
+        zlosses = np.zeros(self.checkpoint)
+        xlosses = np.zeros(self.checkpoint)
 
-        while it < train_epoch:
+        while it < train_epoch+1:
             train_in = self.get_batch_synth(self.batch_size, norm_param=norm, norm_spec=False)
             inp = np.reshape(train_in[0].detach().numpy(),(self.batch_size,7167,1))
             out = train_in[1].numpy()
@@ -28,12 +28,12 @@ class Synth_Network(Network):
             dec_loss = self.decoder.train_on_batch(\
                 np.concatenate([out,np.zeros([self.batch_size,self.num_z])],axis=1), inp)
            
-            ylosses[it%self.verbose] = enc_loss[1]
-            zlosses[it%self.verbose] = enc_loss[2]
-            xlosses[it%self.verbose] = dec_loss
+            ylosses[it%self.checkpoint] = enc_loss[1]
+            zlosses[it%self.checkpoint] = enc_loss[2]
+            xlosses[it%self.checkpoint] = dec_loss
            
-            if it % self.verbose == 0:
-                self.curr_epoch += self.verbose
+            if it % self.checkpoint == 0:
+                self.curr_epoch += self.checkpoint
 
                 print('Iterations %d' % self.curr_epoch) 
                 print('Encoder_Params Loss %f' % np.mean(ylosses))
@@ -45,12 +45,11 @@ class Synth_Network(Network):
                 self.losses['enc_z'].append(np.mean(zlosses))
                 self.losses['dec_x'].append(np.mean(xlosses))
  
-                ylosses = np.zeros(self.verbose)
-                zlosses = np.zeros(self.verbose)
-                xlosses = np.zeros(self.verbose)
+                ylosses = np.zeros(self.checkpoint)
+                zlosses = np.zeros(self.checkpoint)
+                xlosses = np.zeros(self.checkpoint)
                
-                if it % self.verbose*self.save_freq == 0:
-                    self.save()
+                self.save()
 
             it += 1
    
