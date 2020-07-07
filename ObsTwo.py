@@ -56,10 +56,16 @@ class Obs_Network(Network):
         ae_loss = loss_ae_mask(self.en_input_obs, self.decoder_obs(encoded_obs), self.mask, self.err)
         synth_enc_loss = loss_mse(self.de_input_synth, encoded_synth)
         synth_dec_loss = loss_mse(self.en_input_synth, decoded_synth)
-        regular_loss = 0
+        
+        loss = ae_loss + synth_enc_loss + synth_dec_loss 
+        
+
+        regular_loss = loss_l2(encoded_synth, encoded_obsnet_synthin)
+        #the loss is always calculated but is only used when the following condition is true
+        #this is done to remove some if statements later on, #TODO clarify 
 
         if regular=='l2':
-            regular_loss = loss_l2(encoded_synth, encoded_obsnet_synthin)
+            loss += regular_loss
 
         if regular=='w2':
             L = 50
@@ -70,9 +76,8 @@ class Obs_Network(Network):
             proj_obs = K.dot(self.encoder_obs(self.en_input_obs)[0], K.transpose(theta))
 
             regular_loss = loss_w2(proj_synth, proj_obs, self.batch_size)
-           
-
-        loss = ae_loss + synth_enc_loss + synth_dec_loss + regular_loss 
+            loss += regular_loss
+        
         self.ae_obs.add_loss(loss)
         self.ae_obs.add_metric(ae_loss, name='ae_obs', aggregation='mean')
         self.ae_obs.add_metric(synth_enc_loss, name='enc_synth', aggregation='mean')
